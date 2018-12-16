@@ -3,7 +3,7 @@ function P4_Optical_Character_Recognition_PDI10
 %R2016b
 
 
-%WRITE YOUR CODE HERE:
+
 
 %Nota: si es la primera vegada que s'executa el programa, primer demana a
 %quina carpeta es troben les imatges d'entrenament. Despr?s demana la
@@ -12,7 +12,7 @@ function P4_Optical_Character_Recognition_PDI10
 %la carpeta per entrenar, s'ha d'eliminar el fitxer 'trainingData.mat'.
 
 
-%mira si ja existeix un fitxer amb les dades processades d'entrenament
+%Looks if there already exists a file with the processed training data
 entr_profile={};
 train=false;
 path='';
@@ -44,15 +44,15 @@ uiwait(fmsg); %blocks execution until uiresume is called or the figure h is dele
 img = imread(strcat(img_pathname,img_filename));
 
 
-%s'arregla la imatge
-%path='/Users/Nick/Documents/Classe/PDI/P4/Database-2'; %path de la carpeta amb imatges d'entrenament
+%Image is processed to facilitate numbers recognition
+
 resize=[400 250]; %files, columnes
 
 img_gray=rgb2gray(img); %passa a gray
 img_gray=imgaussfilt(img_gray); %filtre de suavitzat gausia per treure soroll
 
-%top-hat per uniformitzar la iluminacio
-img2=255-img_gray; %top-hat funciona si el fons es negre, per tant neguem
+%top-hat to uniform illumination
+img2=255-img_gray; %top-hat works if the background is black. Therefore, it makes negative
 estr= strel('disk',20);
 img_uni=imtophat(img2, estr);
 img_uni=255-img_uni;
@@ -70,8 +70,7 @@ img_bi=imbinarize(img_uni,'global'); %returns bw image with a threshold determin
 
 
 
-%bounding box (algoritme de reconstruccio amb marcadors). S'extreuen els
-%numeros que ha de marcar l'usuari:
+%bounding box (algoritme de reconstruccio amb marcadors). Extracts numbers that user marks
 tamany_img = size(img);
 boolLine=false;
 colLeft=tamany_img(2);
@@ -239,7 +238,7 @@ img_box=imcrop(img_biN,[colLeft filaTop width height]); %copia una regio de la i
 
 
 
-%extraccio d'objectes amb Projection
+%object extraction with Projection
 %projection de columnes: (suma pixels blancs de cada columna)
 tamany_img=size(img_box);
 array_columnes=zeros(1,tamany_img(2));
@@ -279,7 +278,7 @@ for i=1:tamany_img(2)
 end
 
 
-%ailla objectes
+%isolates objects
 array_objectes=cell(1,1); %guarda les img de cada objecte
 llargadaLimits=size(limits);
 k=1;
@@ -368,7 +367,7 @@ end
 
 if(train==true) %s'ha d'entrenar
     disp('a');
-    %entrenament amb region geometric profile descriptor
+    %training with region geometric profile descriptor
     llista= dir(path); %fitxers dins el directori  
     tamany_llista=size(llista);
     entr_profile=cell(tamany_llista(1),3);%[num_img, pixels_profile]. Atencio: els ultims valors poden estar buits
@@ -386,8 +385,8 @@ if(train==true) %s'ha d'entrenar
             img_entr=im2bw(img_entr);
             img_entr=imcomplement(img_entr);
             
-            %es busca que els nums tinguin la mateixa mida en la imatge. Primer
-            %es treuen els bordes laterals i top/bottom:
+            %escalates so numbers have the same size as image
+            %Primer es treuen els bordes laterals i top/bottom:
 
             %troba els punts mes extrems de la img_entr
             tamany_imgE = size(img_entr);
@@ -510,8 +509,7 @@ end
 
 
 
-%obte descriptor de profile i identifica numero (objectes marcats per
-%l'user)
+%gets profile descriptor and identifies numbers marked by user
 
 num_objectes=size(array_objectes); %imatges de cada un dels nums de l'user
 num_objectes=num_objectes(1);
@@ -563,7 +561,7 @@ for i = 1:num_objectes
         array_filcol=array_filcol/sumA;
         
         
-        %identifica objecte amb k-NN
+        %identifies object with k-NN
         sumDifIdentificat=10000000;
         nomIdentificat=entr_profile{1,1}; %inicialitza
         sizeEntrProf=size(entr_profile);
